@@ -40,21 +40,3 @@ function setup_logger(sp::Spacecraft)
     )
     Base.global_logger(logger)
 end
-
-function science(sp::Spacecraft)
-    bcbf = ReferenceFrame.BCBF(sp.ves)
-    h₀ = SCH.Position(sp.ves, bcbf) |> norm
-    flight = SCH.Flight(sp.ves, bcbf)
-    @info "" altitude="m" velocity="m/s" thrust="N" mass="kg" drag="N" density="kg/m³" _group=:atmospheric
-    while isopen(sp)
-        drag = SCH.Drag(flight) |> norm
-        mass = SCH.Mass(sp.ves)
-        alt = SCH.Position(sp.ves, bcbf) |> norm
-        vel = SCH.Velocity(sp.ves, bcbf) |> norm
-        th = SCH.Thrust(sp.ves)
-        rho = SCH.AtmosphericDensity(flight)
-        @info "" altitude=(alt-h₀) velocity=vel thrust=th mass=mass drag=drag density=rho _group=:atmospheric
-        delay(sp.ts, 0.25; log=false)
-    end
-    nothing
-end
